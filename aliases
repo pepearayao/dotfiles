@@ -1,0 +1,8 @@
+# Get External IP / Internet Speed
+alias myip="curl https://ipinfo.io/json" # or /ip for plain-text ip
+
+# Open Jupyter Notebook
+alias jn='cd jupyter notebook'
+
+# Open entremed folder
+alias entremed='cd ~/code/entremed'
