@@ -3,14 +3,16 @@
 This project is for the personal setup of a new laptop for myself. This assumes an Intel Macbook Pro notebook.
 It has been heavily based on the setup guide used by [Le Wagon](https://www.lewagon.com) for their bootcamps.
 
-To setup you will have to do the following in thefollwing order.
+⚠️ Before cloning read until step 2.
+
+To setup you will have to do the following in the follwing order.
 
 1. Install Gitlab CLI
-2. Install XCode
-3. Install Homebrew and its extensions
-4. Install Visual Studio Code and its extensions
-5. Install Oh my zsh!
-6. Install the dotfiles
+2. Install the dotfiles
+3. Install XCode
+4. Install Homebrew and its extensions
+5. Install Visual Studio Code and its extensions
+6. Install Oh my zsh!
 7. Install Python, Jupyter and all their packages
 8. Install Docker
 9. Install DBeaver
@@ -78,11 +80,7 @@ mkdir -p ~/code/$GITHUB_USERNAME && cd $_
 gh repo fork pepearayao/dotfiles --clone
 ```
 
-Run the `dotfiles` installer.
-
-```bash
-cd ~/code/$GITHUB_USERNAME/dotfiles && zsh install.sh
-```
+We will install all of this in a later stage.
 
 ## Command Line Tools
 
@@ -123,7 +121,6 @@ To do so, open your Terminal and run:
 ```
 
 This will ask for your confirmation (hit `Enter`) and your **macOS user account password** (the one you use to [log in](https://support.apple.com/en-gb/HT202860) when you reboot your Macbook).
-:warning: When typing a password in the Terminal, you will **not** get a visual feedback (something like `*****`), this is **normal**!! Type the password and confirm by typing `Enter`.
 
 <details>
   <summary>🛠 If you get a <code>Error: Not a valid ref: refs/remotes/origin/master</code> error</summary>
@@ -202,9 +199,6 @@ code
 
 :heavy_check_mark: If a VS Code window has just opened, you're good to go :+1:
 
-:x: Otherwise, please **contact a teacher**
-
-
 ## VS Code Extensions
 
 ### Installation
@@ -245,29 +239,7 @@ At the end your terminal should look like this:
 brew install direnv
 ```
 
-Then, do the following so it reloads everytime you open a folder or want to run direnv.
-
-``` bash
-nano ~/.zshrc
-```
-
-Search for the line that says plugins and paste direnv at the end. It should look like this:
-![Plugin line in zshrc](assets/direnv_plugin.png)
-
-
 ## Dotfiles
-
-Open your terminal and run the following command:
-
-```bash
-export GITHUB_USERNAME=`gh api user | jq -r '.login'`
-echo $GITHUB_USERNAME
-```
-
-You should see your GitHub username printed. If it's not the case, **stop here** and ask for help.
-There seems to be a problem with the previous step (`gh auth`).
-
-Time to fork the repo and clone it on your laptop:
 
 Run the `dotfiles` installer.
 
@@ -293,3 +265,291 @@ you **need** to put one of the email listed above thanks to the previous `gh api
 don't do that, Kitt won't be able to track your progress.
 
 Please now **quit** all your opened terminal windows.
+
+## Installing Python (with [`pyenv`](https://github.com/pyenv/pyenv))
+
+### Uninstall `conda`
+
+As we are using `pyenv` to install and manage our Python version, we need to uninstall [`conda`](https://docs.conda.io/projects/conda/en/latest/), another package manager you may have on your machine if you previously installed [Anaconda](https://www.anaconda.com/). Thus, we are preventing any possible Python version issue later.
+
+Check if you have `conda` installed on your machine:
+
+```bash
+conda list
+```
+If you have `zsh: command not found: conda`, you can **skip** the uninstall of `conda` and jump to the **Install pre-requisites** section.
+
+<details>
+    <summary markdown='span'><code>conda</code> uninstall instructions</summary>
+
+- Install the Anaconda-Clean package from your terminal and run the cleaning
+```bash
+conda install anaconda-clean
+anaconda-clean --yes
+```
+- Remove every Anaconda directories
+```bash
+rm -rf ~/anaconda2
+rm -rf ~/anaconda3
+rm -rf ~/.anaconda_backup
+rm -rf ~/opt
+```
+- Remove Anaconda path from your `.bash_profile`
+    - Open the file with `code ~/.bash_profile`
+    - If the file opens find the line matching the following pattern `export PATH="/path/to/anaconda3/bin:$PATH"` and delete the line
+    - Save the file with `CMD` + `s`
+- Restart your terminal with `exec zsh`
+- Remove Anaconda initialization from your `.zshrc`:
+    - Open the file with `code ~/.zshrc`
+    - Remove the code lines starting from `>>> conda initialize >>>` to `<<< conda initialize <<<`
+</details>
+
+
+### Install pre-requisites
+
+Before installing Python, please check your `xz` version with:
+
+```bash
+brew info xz
+```
+
+It should be more than `5.2.0`, **if not** you should run:
+
+```bash
+sudo rm -rf /usr/local/opt/xz
+brew upgrade
+brew install xz
+```
+
+Then run:
+
+```bash
+brew install readline
+```
+
+### Install `pyenv`
+
+macOS comes with an outdated version of Python that we don't want to use. You might already have installed Anaconda or something else to tinker with Python and Data Science packages. All of this does not really matter as we are going to do a professional setup of Python where you'll be able to switch which version you want to use whenever you type `python` in the terminal.
+
+First let's install `pyenv` with the following Terminal command:
+
+```bash
+brew install pyenv
+exec zsh
+```
+
+### Install Python
+
+Let's install the [latest stable version of Python](https://www.python.org/doc/versions/):
+
+```bash
+pyenv install 3.10.6
+```
+
+<details>
+  <summary>🛠 Troubleshooting</summary>
+
+If you encounter an error installing Python with `pyenv` about `zlib`:
+
+```txt
+zipimport.ZipImportError: can't decompress data; zlib not available
+```
+
+Install `zlib` with:
+
+```bash
+brew install zlib
+export LDFLAGS="-L/usr/local/opt/zlib/lib"
+export CPPFLAGS="-I/usr/local/opt/zlib/include"
+```
+
+Then try to install Python again:
+
+```bash
+pyenv install 3.10.6
+```
+
+It could raise another error about `bzip2`, you can ignore it and continue to the next step.
+
+</details>
+<br>
+
+OK once this command is complete, we are going to tell the system to use this version of Python **by default**. This is done with:
+
+```bash
+pyenv global 3.10.6
+exec zsh
+```
+
+To check if this worked, run `python --version`. If you see `3.10.6`, perfect! If not, ask a TA that will help you debug the problem thanks to `pyenv versions` and `type -a python` (`python` should be using the `.pyenv/shims` version first).
+
+
+## Python Virtual Environment
+
+Before we start installing relevant Python packages, we will isolate the setup of the machine into a **dedicated** virtual environment. We will use a `pyenv` plugin called [`pyenv-virtualenv`](https://github.com/pyenv/pyenv-virtualenv).
+
+First let's install this plugin:
+
+```bash
+git clone https://github.com/pyenv/pyenv-virtualenv.git $(pyenv root)/plugins/pyenv-virtualenv
+exec zsh
+```
+
+Let's create the virtual environment we are going to use during the whole bootcamp:
+
+```bash
+pyenv virtualenv 3.10.6 default
+```
+
+Let's now set the virtual environment with:
+
+```bash
+pyenv global default
+```
+
+Great! Anytime we'll install Python package, we'll do it in that environment.
+
+
+## Python packages
+
+Now it's time to install some packages in it.
+
+First, let's upgrade `pip`, the tool to install Python Packages from [pypi.org](https://pypi.org). In the latest terminal where the virtualenv `default` is activated, run:
+
+```bash
+pip install --upgrade pip
+```
+
+Then within the same folder, let's install some packages:
+
+``` bash
+pip install -r requirements.txt
+```
+
+## `jupyter` notebook extensions
+
+Improve `jupyter` notebooks with extensions:
+
+```bash
+# install nbextensions
+jupyter contrib nbextension install --user
+jupyter nbextension enable toc2/main
+jupyter nbextension enable collapsible_headings/main
+jupyter nbextension enable spellchecker/main
+jupyter nbextension enable code_prettify/code_prettify
+```
+
+### Custom CSS
+
+Improve the display of the [`details` disclosure elements](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/details) in the notebooks.
+
+Open `custom/custom.css` in the config directory:
+```bash
+cd $(jupyter --config-dir)
+mkdir -p custom
+touch custom/custom.css
+code custom/custom.css
+```
+Edit `custom.css` with:
+
+```css
+summary {
+    cursor: pointer;
+    display:list-item;
+}
+summary::marker {
+    font-size: 1em;
+}
+```
+
+### `jupyter` check up
+
+Let's reset your terminal:
+
+```bash
+exec zsh
+```
+
+Now, check you can launch a notebook server on your machine:
+
+```bash
+jupyter notebook
+```
+
+Your web browser should open on a `jupyter` window:
+
+![jupyter.png](images/jupyter.png)
+
+Click on `New`:
+
+![jupyter_new.png](images/jupyter_new.png)
+
+A tab should open on a new notebook:
+
+![jupyter_notebook.png](images/jupyter_notebook.png)
+
+### `nbextensions` check up
+
+Perform a sanity check for `jupyter notebooks nbextensions`. Click on `Nbextensions`:
+
+![jupyter_nbextensions.png](images/jupyter_nbextensions.png)
+
+Untick _"disable configuration for nbextensions without explicit compatibility"_ then check that _at least_ all `nbextensions` circled in red are enabled:
+
+![nbextensions.png](images/nbextensions.png)
+
+You can close your web browser then terminate the jupyter server with `CTRL` + `C`.
+
+
+### Python setup check up
+
+Check your Python version with the following commands:
+```bash
+zsh -c "$(curl -fsSL https://raw.githubusercontent.com/lewagon/data-setup/master/checks/python_checker.sh)" 3.10.6
+```
+
+Run the following command to check if you successfully installed the required packages:
+```bash
+zsh -c "$(curl -fsSL https://raw.githubusercontent.com/lewagon/data-setup/master/checks/pip_check.sh)"
+```
+
+Now run the following command to check if you can load these packages:
+```bash
+python -c "$(curl -fsSL https://raw.githubusercontent.com/lewagon/data-setup/master/checks/pip_check.py)"
+```
+
+Make sure you can run Jupyter:
+
+```bash
+jupyter notebook
+```
+
+And open a `Python 3` notebook.
+
+Make sure that you are running the correct python version in the notebook. Open a cell and run :
+``` python
+import sys; sys.version
+```
+
+Here you have it! A complete python virtual env with all the third-party packages you'll need for the whole bootcamp.
+
+
+
+## DBeaver
+
+Download and install [DBeaver](https://dbeaver.io/), a free and open source powerful tool to connect to any database, explore the schema and even **run SQL queries**.
+
+
+## Docker 🐋
+
+Docker is an open platform for developing, shipping, and running applications.
+
+_if you already have Docker installed on your machine please update with the latest version_
+
+### Install Docker
+
+Go to [Docker](https://docs.docker.com/get-docker/) website and choose Apple Intel:
+
+![](images/docker.png)
+
+Then follow the setup instructions, you are going to install a desktop application.
